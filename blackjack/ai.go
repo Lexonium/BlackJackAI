@@ -1,9 +1,8 @@
 package blackjack
 
 import (
+	"BlackJackAI/deck"
 	"fmt"
-
-	"/deck"
 )
 
 type AI interface {
@@ -38,6 +37,7 @@ func HumanAI() AI {
 type humanAI struct{}
 
 func (ai humanAI) Bet(shuffled bool) int {
+	fmt.Println("========NEW HAND=================")
 	if shuffled {
 		fmt.Println("The deck was just shuffled.")
 	}
@@ -49,10 +49,36 @@ func (ai humanAI) Bet(shuffled bool) int {
 
 func (ai humanAI) Play(hand []deck.Card, dealer deck.Card) Move {
 	for {
-		fmt.Println("Player:", hand)
+		fmt.Println("Player:", hand, "Score:", Score(hand...))
 		fmt.Println("Dealer:", dealer)
 		fmt.Println("What will you do? (h)it, (s)tand, (d)ouble, s(p)lit")
 		var input string
+		var flag bool
+		flag = true
+		for flag {
+			fmt.Scanf("%s\n", &input)
+			switch input {
+			case "h":
+				return MoveHit
+			case "s":
+				return MoveStand
+			case "d":
+				if len(hand) == 2 {
+					return MoveDouble
+				} else {
+					fmt.Println("You can't double this hand")
+				}
+
+			case "p":
+				if len(hand) == 2 && hand[0] == hand[1] {
+					return MoveSplit
+				} else {
+					fmt.Println("You can't split this hand")
+				}
+			default:
+				fmt.Println("Invalid option:", input)
+			}
+		}
 		fmt.Scanf("%s\n", &input)
 		switch input {
 		case "h":
@@ -70,10 +96,10 @@ func (ai humanAI) Play(hand []deck.Card, dealer deck.Card) Move {
 }
 
 func (ai humanAI) Results(hands [][]deck.Card, dealer []deck.Card) {
-	fmt.Println("==FINAL HANDS==")
+	fmt.Println("=========================FINAL HANDS=====================")
 	fmt.Println("Player:")
 	for _, h := range hands {
 		fmt.Println(" ", h)
 	}
-	fmt.Println("Dealer:", dealer)
+	fmt.Println("Dealer:", dealer, "\tScore:", Score(dealer...))
 }

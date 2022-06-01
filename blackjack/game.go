@@ -2,8 +2,9 @@ package blackjack
 
 import (
 	"errors"
+	"fmt"
 
-	"github.com/gophercises/deck"
+	"BlackJackAI/deck"
 )
 
 const (
@@ -77,9 +78,14 @@ type hand struct {
 
 func bet(g *Game, ai AI, shuffled bool) {
 	bet := ai.Bet(shuffled)
-	if bet < 100 {
-		panic("bet must be at least 100")
+	for bet < 10 {
+		fmt.Println("Apuesta minima de 10")
+		bet = ai.Bet(shuffled)
 	}
+	// bet := ai.Bet(shuffled)
+	// if bet < 10 {
+	// 	panic("bet must be at least 10")
+	// }
 	g.playerBet = bet
 }
 
@@ -208,6 +214,7 @@ func endRound(g *Game, ai AI) {
 	dScore := Score(g.dealer...)
 	dBlackjack := Blackjack(g.dealer...)
 	allHands := make([][]deck.Card, len(g.player))
+	op := 0
 	for hi, hand := range g.player {
 		cards := hand.cards
 		allHands[hi] = cards
@@ -216,26 +223,75 @@ func endRound(g *Game, ai AI) {
 		switch {
 		case pBlackjack && dBlackjack:
 			winnings = 0
+			op = 1
+			// DRAW
 		case dBlackjack:
 			winnings = -winnings
+			op = 2
 		case pBlackjack:
 			winnings = int(float64(winnings) * g.blackjackPayout)
+			op = 3
 		case pScore > 21:
 			winnings = -winnings
+			op = 4
 		case dScore > 21:
-			// win
-		case pScore > dScore:
-			// win
+			winnings = +winnings
+			op = 5
+		case pScore > dScore && pScore <= 21:
+			//winnings = +winnings
+			op = 6
 		case dScore > pScore:
-			winnings = -winnings
+			//winnings = -winnings
+			op = 7
 		case dScore == pScore:
 			winnings = 0
+			op = 8
 		}
 		g.balance += winnings
 	}
-	ai.Results(allHands, g.dealer)
+	//ai.Results(allHands, g.dealer)
+	//ai.Results(g.player,g.dealer)
+	fmt.Println("=========================FINAL HANDS=====================")
+	fmt.Println("Player:")
+	for _, h := range allHands {
+		fmt.Println(" ", h, "Score:", Score(h...))
+	}
+	fmt.Println("Dealer:", g.dealer, "\tScore:", Score(g.dealer...))
+	fmt.Println(WLMessage(op))
+	fmt.Println("Winnings so far:", g.balance)
 	g.player = nil
 	g.dealer = nil
+}
+func WLMessage(op int) string {
+	text := ""
+	switch {
+	case op == 1:
+		text = ("===========DRAW=============")
+		break
+	case op == 2:
+		text = ("===========LOSE=============")
+		break
+	case op == 3:
+		text = ("===========BLACKJACK=============")
+		break
+	case op == 4:
+		text = ("===========BUST=============")
+		break
+	case op == 5:
+		text = ("===========DEALER BUST=============")
+		break
+	case op == 6:
+		text = ("===========YOU WON!=============")
+		break
+	case op == 7:
+		text = ("===========LOSE=============")
+		break
+	case op == 8:
+		text = ("===========DRAW=============")
+		break
+
+	}
+	return text
 }
 
 // Score will take in a hand of cards and return the best blackjack score

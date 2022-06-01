@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/gophercises/blackjack_ai/blackjack"
-	"github.com/gophercises/deck"
+	"BlackJackAI/blackjack"
+	"BlackJackAI/deck"
 )
 
 type basicAI struct {
@@ -21,34 +21,81 @@ func (ai *basicAI) Bet(shuffled bool) int {
 	trueScore := ai.score / ((ai.decks*52 - ai.seen) / 52)
 	switch {
 	case trueScore >= 14:
-		return 100000
-	case trueScore >= 8:
-		return 5000
-	default:
+		fmt.Println("I bet 100")
 		return 100
+	case trueScore >= 8:
+		fmt.Println("I bet 50")
+		return 50
+	default:
+		fmt.Println("I bet 10")
+		return 10
 	}
 }
 
 func (ai *basicAI) Play(hand []deck.Card, dealer deck.Card) blackjack.Move {
 	score := blackjack.Score(hand...)
+	dScore := blackjack.Score(dealer)
+	fmt.Println("Player:", hand, "Score:", score)
+	fmt.Println("Dealer:", dealer, "Score:", dScore)
+	fmt.Println("What will you do? (h)it, (s)tand, (d)ouble, s(p)lit")
 	if len(hand) == 2 {
 		if hand[0] == hand[1] {
 			cardScore := blackjack.Score(hand[0])
 			if cardScore >= 8 && cardScore != 10 {
+				if cardScore == 9 && (dScore == 7 || (dScore > 9)) {
+					fmt.Println("I stand")
+					return blackjack.MoveStand
+				}
+				fmt.Println("I split")
 				return blackjack.MoveSplit
 			}
 		}
 		if (score == 10 || score == 11) && !blackjack.Soft(hand...) {
+			fmt.Println("I double")
 			return blackjack.MoveDouble
 		}
 	}
-	dScore := blackjack.Score(dealer)
 	if dScore >= 5 && dScore <= 6 {
+		fmt.Println("I stand")
 		return blackjack.MoveStand
 	}
-	if score < 13 {
-		return blackjack.MoveHit
+	if score < 18 {
+		if blackjack.Soft(hand...) { //TENEMOS UN AS
+			if score <= 17 {
+				if (dScore == 5 || dScore == 6) && len(hand) == 2 {
+					fmt.Println("I double")
+					return blackjack.MoveDouble
+				} else {
+					fmt.Println("I hit")
+					return blackjack.MoveHit
+				}
+			}
+
+		} else { //NO HAY UN AS
+			if score <= 9 {
+				return blackjack.MoveHit
+			} else {
+				if (score == 10 || score == 11) && len(hand) == 2 {
+					fmt.Println("I double")
+					return blackjack.MoveDouble
+				}
+				if score >= 12 && score <= 16 && dScore <= 6 {
+					fmt.Println("I stand")
+					return blackjack.MoveStand
+				}
+				if score >= 12 && score <= 16 && dScore >= 7 {
+					fmt.Println("I hit")
+					return blackjack.MoveHit
+				}
+				if score >= 17 {
+					fmt.Println("I stand")
+					return blackjack.MoveStand
+				}
+			}
+		}
+		// return blackjack.MoveHit
 	}
+	fmt.Println("I stand")
 	return blackjack.MoveStand
 }
 
@@ -77,12 +124,13 @@ func (ai *basicAI) count(card deck.Card) {
 func main() {
 	opts := blackjack.Options{
 		Decks:           4,
-		Hands:           999999,
+		Hands:           3,
 		BlackjackPayout: 1.5,
 	}
+	fmt.Println("!!!!!!!!!!!!!!!!!!!!====================NEW GAME===================!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	game := blackjack.New(opts)
-	winnings := game.Play(&basicAI{
-		decks: 4,
-	})
-	fmt.Println(winnings)
+
+	//winnings := game.Play(blackjack.HumanAI()) //SI QUIERES QUE JUEGUE UNA PERSONA
+	winnings := game.Play(&basicAI{decks: 4}) //SI QUIERES QUE JUEGUE EL AI
+	fmt.Println("Final Winnings:", winnings)
 }
