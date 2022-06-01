@@ -52,6 +52,7 @@ func (ai humanAI) Play(hand []deck.Card, dealer deck.Card) Move {
 		fmt.Println("Player:", hand, "Score:", Score(hand...))
 		fmt.Println("Dealer:", dealer)
 		fmt.Println("What will you do? (h)it, (s)tand, (d)ouble, s(p)lit")
+		fmt.Println("Jack White:", ai.Recomendaciones(hand, dealer))
 		var input string
 		var flag bool
 		flag = true
@@ -102,4 +103,71 @@ func (ai humanAI) Results(hands [][]deck.Card, dealer []deck.Card) {
 		fmt.Println(" ", h)
 	}
 	fmt.Println("Dealer:", dealer, "\tScore:", Score(dealer...))
+}
+
+func (ai humanAI) Recomendaciones(hand []deck.Card, dealer deck.Card) string {
+	score := Score(hand...)
+	dScore := Score(dealer)
+	var text string
+	if len(hand) == 2 {
+		if hand[0] == hand[1] {
+			cardScore := Score(hand[0])
+			if cardScore >= 8 && cardScore != 10 {
+				if cardScore == 9 && (dScore == 7 || (dScore > 9)) {
+					text = ("I  recommend stand")
+					return text
+
+				}
+				text = ("I recommend split")
+				return text
+			}
+		}
+		if (score == 10 || score == 11) && !Soft(hand...) {
+			text = ("I recommend double")
+			return text
+		}
+	}
+	if dScore >= 5 && dScore <= 6 {
+		text = ("I recommend stand")
+		return text
+	}
+	if score < 18 {
+		if Soft(hand...) { //TENEMOS UN AS
+			if score <= 17 {
+				if (dScore == 5 || dScore == 6) && len(hand) == 2 {
+					text = ("I recommend double")
+					return text
+				} else {
+					text = ("I recommend hit")
+					return text
+				}
+			}
+
+		} else { //NO HAY UN AS
+			if score <= 9 {
+
+			} else {
+				if (score == 10 || score == 11) && len(hand) == 2 {
+					text = ("I recommend double")
+					return text
+				}
+				if score >= 12 && score <= 16 && dScore <= 6 {
+					text = ("I recommend stand")
+					return text
+				}
+				if score >= 12 && score <= 16 && dScore >= 7 {
+					text = ("I recommend hit")
+					return text
+				}
+				if score >= 17 {
+					text = ("I recommend stand")
+					return text
+
+				}
+			}
+		}
+		// return blackjack.MoveHit
+	}
+	text = ("I recommend stand")
+	return text
 }
