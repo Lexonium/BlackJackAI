@@ -238,10 +238,10 @@ func endRound(g *Game, ai AI) {
 			winnings = +winnings
 			op = 5
 		case pScore > dScore && pScore <= 21:
-			//winnings = +winnings
+			winnings = +winnings
 			op = 6
-		case dScore > pScore:
-			//winnings = -winnings
+		case dScore > pScore && dScore <= 21:
+			winnings = -winnings
 			op = 7
 		case dScore == pScore:
 			winnings = 0

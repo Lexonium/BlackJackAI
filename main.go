@@ -122,15 +122,26 @@ func (ai *basicAI) count(card deck.Card) {
 }
 
 func main() {
+	var input string
+	var winnings int
 	opts := blackjack.Options{
 		Decks:           4,
-		Hands:           3,
+		Hands:           20,
 		BlackjackPayout: 1.5,
 	}
 	fmt.Println("!!!!!!!!!!!!!!!!!!!!====================NEW GAME===================!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	game := blackjack.New(opts)
-
+	fmt.Println("Quien va jugar")
+	fmt.Scanf("%s\n", &input)
+	switch input {
+	case "1":
+		winnings = game.Play(blackjack.HumanAI())
+		break
+	case "2":
+		winnings = game.Play(&basicAI{decks: 4})
+		break
+	}
 	//winnings := game.Play(blackjack.HumanAI()) //SI QUIERES QUE JUEGUE UNA PERSONA
-	winnings := game.Play(&basicAI{decks: 4}) //SI QUIERES QUE JUEGUE EL AI
+	//winnings := game.Play(&basicAI{decks: 4}) //SI QUIERES QUE JUEGUE EL AI
 	fmt.Println("Final Winnings:", winnings)
 }
