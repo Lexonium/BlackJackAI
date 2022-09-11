@@ -1,6 +1,6 @@
 # BlackJackAI
 Blackjack AI based on previous blackjack game
-This proyect to simulate an artificial intelligence, this program deals hands of blackjack and the AI recommends whether to hit,split,double or fold.
+This proyect simulates an artificial intelligence, this program deals hands of blackjack and the AI recommends whether to hit,split,double or fold.
 
 Para correr el programa se tiene que tener instalado go en su maquina y LINK: https://go.dev/doc/install
 preferiblemente vscode con las extensiones de go
